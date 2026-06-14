@@ -200,6 +200,20 @@
     padding: 0 2px 16px;
   }
 
+  .sidebar-hub {
+    padding: 0 2px 12px;
+    gap: 12px;
+  }
+
+  .sidebar-hub__section {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .sidebar-settings-button {
+    min-height: 42px;
+  }
+
   .sidebar-nav,
   .sidebar--collapsed .sidebar-nav {
     flex: 1 1 auto;

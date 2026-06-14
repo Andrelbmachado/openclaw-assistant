@@ -6,6 +6,13 @@
       "kind": "html-attribute",
       "name": "aria-label",
       "path": "ui/src/ui/app-render.ts",
+      "text": "Configurações"
+    },
+    {
+      "count": 1,
+      "kind": "html-attribute",
+      "name": "aria-label",
+      "path": "ui/src/ui/app-render.ts",
       "text": "Workshop view"
     },
     {
@@ -14,6 +21,13 @@
       "name": "title",
       "path": "ui/src/ui/app-render.ts",
       "text": "Board view"
+    },
+    {
+      "count": 1,
+      "kind": "html-attribute",
+      "name": "title",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Configurações"
     },
     {
       "count": 1,
@@ -34,7 +48,56 @@
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/ui/app-render.ts",
+      "text": "Agentes"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
       "text": "Board"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Configurações"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Conversas recentes"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Histórico"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Nenhum agente configurado."
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Nenhum projeto ativo."
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Nenhuma conversa recente."
     },
     {
       "count": 1,
@@ -48,7 +111,28 @@
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/ui/app-render.ts",
+      "text": "Projetos"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
       "text": "Today"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Todos os agentes"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/app-render.ts",
+      "text": "Trabalhos ativos"
     },
     {
       "count": 1,
@@ -504,6 +588,27 @@
       "name": "label",
       "path": "ui/src/ui/navigation.ts",
       "text": "settings"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents-panels-graph.ts",
+      "text": "Agent topology"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents-panels-graph.ts",
+      "text": "Canonical OpenClaw configuration rendered as a connected workflow."
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents-panels-graph.ts",
+      "text": "Select a node to open its canonical editor."
     },
     {
       "count": 1,
@@ -1281,6 +1386,160 @@
       "name": "label",
       "path": "ui/src/ui/views/agents-utils.ts",
       "text": "write"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents.ts",
+      "text": "-&gt;"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents.ts",
+      "text": "Live overview"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents.ts",
+      "text": "Open workflow"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents.ts",
+      "text": "Select an agent to open its visual workflow."
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/agents.ts",
+      "text": "Your agents"
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "label",
+      "path": "ui/src/ui/views/agents.ts",
+      "text": "Workflow"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "API keys and accounts"
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Each provider keeps its own authentication contract. Secrets are entered in the provider CLI, never inside this web page."
+    },
+    {
+      "count": 1,
+      "kind": "html-text",
+      "name": "text",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Model connections"
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Adds a Gemini API key from Google AI Studio."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Adds an Anthropic API key through the provider-owned secure flow."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Browser OAuth for an eligible ChatGPT or Codex subscription."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Connect an Anthropic API key or reuse a Claude CLI login on this computer."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Reuses a Claude CLI session already authenticated on this host."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Starts Gemini CLI OAuth with a localhost browser callback."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "The terminal asks for the key so it never passes through the web page."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Use an AI Studio key or connect a Google account through Gemini CLI OAuth."
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "description",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Use direct API billing or your supported ChatGPT/Codex subscription."
+    },
+    {
+      "count": 3,
+      "kind": "object-property",
+      "name": "label",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Connect API key"
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "label",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Sign in with ChatGPT"
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "label",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Sign in with Google"
+    },
+    {
+      "count": 1,
+      "kind": "object-property",
+      "name": "label",
+      "path": "ui/src/ui/views/api-keys.ts",
+      "text": "Use Claude CLI account"
     },
     {
       "count": 1,

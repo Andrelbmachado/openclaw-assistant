@@ -37,6 +37,7 @@ describe("TAB_GROUPS", () => {
 
     expect(isTabInGroup(settings, "appearance")).toBe(true);
     expect(isTabInGroup(settings, "channels")).toBe(true);
+    expect(isTabInGroup(settings, "apiKeys")).toBe(true);
     expect(isTabInGroup(settings, "debug")).toBe(true);
     expect(isTabInGroup(settings, "chat")).toBe(false);
   });
@@ -48,6 +49,7 @@ describe("TAB_GROUPS", () => {
     expect(tabFromPath("/infrastructure")).toBe("infrastructure");
     expect(tabFromPath("/ai-agents")).toBe("aiAgents");
     expect(tabFromPath("/config")).toBe("config");
+    expect(tabFromPath("/api-keys")).toBe("apiKeys");
     expect(tabFromPath("/channels")).toBe("channels");
   });
 });

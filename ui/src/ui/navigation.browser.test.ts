@@ -358,6 +358,7 @@ describe("control UI routing", () => {
     expectElement(app, ".sidebar-shell__header", HTMLElement);
     expectElement(app, ".sidebar-shell__body", HTMLElement);
     expectElement(app, ".sidebar-shell__footer", HTMLElement);
+    expectElement(app, ".sidebar-settings-button", HTMLButtonElement);
     expectElement(app, ".sidebar-brand", HTMLElement);
     expectElement(app, ".sidebar-brand__logo", HTMLElement);
     expectElement(app, ".sidebar-brand__copy", HTMLElement);

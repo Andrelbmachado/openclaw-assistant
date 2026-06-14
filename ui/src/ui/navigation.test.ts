@@ -43,6 +43,7 @@ describe("iconForTab", () => {
       nodes: "monitor",
       dreams: "moon",
       config: "settings",
+      apiKeys: "link",
       communications: "send",
       appearance: "spark",
       automation: "terminal",
@@ -79,6 +80,7 @@ describe("titleForTab", () => {
       nodes: "Nodes",
       dreams: "Dreaming",
       config: "Settings",
+      apiKeys: "API Keys & Accounts",
       communications: "Communications",
       appearance: "Appearance",
       automation: "Automation",
@@ -109,6 +111,7 @@ describe("subtitleForTab", () => {
       nodes: "Paired devices and commands.",
       dreams: "Memory dreaming, consolidation, and reflection.",
       config: "Edit openclaw.json.",
+      apiKeys: "Connect model API keys and supported subscription accounts.",
       communications: "Channels, messages, and audio settings.",
       appearance: "Theme, UI, and setup wizard settings.",
       automation: "Commands, hooks, cron, and plugins.",
@@ -239,6 +242,7 @@ describe("TAB_GROUPS", () => {
     expect(settings?.tabs).toEqual(["config"]);
     expect(SETTINGS_TABS).toEqual([
       "config",
+      "apiKeys",
       "channels",
       "communications",
       "appearance",

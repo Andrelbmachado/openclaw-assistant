@@ -118,6 +118,7 @@ import {
   updateExecApprovalsFormValue,
 } from "./controllers/exec-approvals.ts";
 import { loadLogs } from "./controllers/logs.ts";
+import { loadModelAuthStatusState } from "./controllers/model-auth-status.ts";
 import { loadNodes } from "./controllers/nodes.ts";
 import { loadPresence } from "./controllers/presence.ts";
 import {
@@ -180,7 +181,7 @@ import {
 import "./components/dashboard-header.ts";
 import type { SidebarContent } from "./sidebar-content.ts";
 import { loadLocalAssistantIdentity } from "./storage.ts";
-import { normalizeStringEntries } from "./string-coerce.ts";
+import { normalizeLowercaseStringOrEmpty, normalizeStringEntries } from "./string-coerce.ts";
 import { normalizeOptionalString } from "./string-coerce.ts";
 import type {
   ArtifactDownloadResult,
@@ -197,6 +198,7 @@ import {
   resolveModelPrimary,
   sortLocaleStrings,
 } from "./views/agents-utils.ts";
+import { renderApiKeys } from "./views/api-keys.ts";
 import { renderChat } from "./views/chat.ts";
 import { renderCommandPalette } from "./views/command-palette.ts";
 import { getPresetById } from "./views/config-presets.ts";
@@ -548,6 +550,8 @@ function renderSidebarSessions(state: AppViewState) {
   const collapsed = state.settings.navCollapsed;
   const busy = isSidebarSessionBusy(state);
   const recent = collapsed ? [] : resolveSidebarRecentSessions(state);
+  const projectSessions = collapsed ? [] : resolveSidebarProjectSessions(state);
+  const activeAgents = collapsed ? [] : resolveSidebarActiveAgents(state);
   const newSessionDisabled = !state.connected || state.sessionsLoading || busy || !state.client;
   const newSessionTitle = !state.connected
     ? "Connect to create a new session"
@@ -557,65 +561,100 @@ function renderSidebarSessions(state: AppViewState) {
 
   return html`
     <section class="sidebar-sessions ${collapsed ? "sidebar-sessions--collapsed" : ""}">
-      <button
-        type="button"
-        class="sidebar-new-session"
-        title=${newSessionTitle}
-        aria-label=${t("chat.runControls.newSession")}
-        ?disabled=${newSessionDisabled}
-        @click=${async () => {
-          if (newSessionDisabled) {
-            return;
-          }
-          if (await createChatSession(state, { source: "user" })) {
-            state.setTab("chat" as import("./navigation.ts").Tab);
-          }
-        }}
-      >
-        <span class="sidebar-new-session__icon" aria-hidden="true">${icons.plus}</span>
+      <div class="sidebar-hub">
+        <button
+          type="button"
+          class="sidebar-new-session"
+          title=${newSessionTitle}
+          aria-label=${t("chat.runControls.newSession")}
+          ?disabled=${newSessionDisabled}
+          @click=${async () => {
+            if (newSessionDisabled) {
+              return;
+            }
+            if (await createChatSession(state, { source: "user" })) {
+              state.setTab("chat" as import("./navigation.ts").Tab);
+            }
+          }}
+        >
+          <span class="sidebar-new-session__icon" aria-hidden="true">${icons.plus}</span>
+          ${collapsed
+            ? nothing
+            : html`<span class="sidebar-new-session__label"
+                >${t("chat.runControls.newSession")}</span
+              >`}
+        </button>
+
+        <div class="sidebar-session-select ${collapsed ? "sidebar-session-select--collapsed" : ""}">
+          ${renderChatSessionSelect(state, switchChatSession, {
+            compact: collapsed,
+            sessionSwitcherOnly: true,
+            surface: "sidebar",
+          })}
+        </div>
+
         ${collapsed
           ? nothing
-          : html`<span class="sidebar-new-session__label"
-              >${t("chat.runControls.newSession")}</span
-            >`}
-      </button>
-      <div class="sidebar-session-select ${collapsed ? "sidebar-session-select--collapsed" : ""}">
-        ${renderChatSessionSelect(state, switchChatSession, {
-          compact: collapsed,
-          sessionSwitcherOnly: true,
-          surface: "sidebar",
-        })}
-      </div>
-      ${collapsed || recent.length === 0
-        ? nothing
-        : html`
-            <div
-              class="sidebar-recent-sessions ${state.settings.recentSessionsCollapsed
-                ? "sidebar-recent-sessions--collapsed"
-                : ""}"
-              aria-label=${t("overview.cards.recentSessions")}
-            >
-              <button
-                class="sidebar-recent-sessions__label"
-                type="button"
-                aria-expanded=${String(!state.settings.recentSessionsCollapsed)}
-                @click=${() => {
-                  state.applySettings({
-                    ...state.settings,
-                    recentSessionsCollapsed: !state.settings.recentSessionsCollapsed,
-                  });
-                }}
-              >
-                <span class="sidebar-recent-sessions__label-text"
-                  >${t("usage.sessions.recentShort")}</span
-                >
-                <span class="sidebar-recent-sessions__chevron"> ${icons.chevronDown} </span>
-              </button>
-              <div class="sidebar-recent-sessions__list">
-                ${recent.map((row) => renderSidebarRecentSession(state, row))}
+          : html`
+              <div class="sidebar-hub__section">
+                <div class="sidebar-hub__section-header">
+                  <div>
+                    <div class="sidebar-hub__eyebrow">Histórico</div>
+                    <div class="sidebar-hub__title">Conversas recentes</div>
+                  </div>
+                  <span class="sidebar-hub__count">${String(recent.length)}</span>
+                </div>
+                <div class="sidebar-hub__list">
+                  ${recent.length === 0
+                    ? html`<div class="sidebar-hub__empty">Nenhuma conversa recente.</div>`
+                    : recent.map((row) => renderSidebarRecentSession(state, row))}
+                </div>
               </div>
-            </div>
-          `}
+
+              <div class="sidebar-hub__section">
+                <div class="sidebar-hub__section-header">
+                  <div>
+                    <div class="sidebar-hub__eyebrow">Projetos</div>
+                    <div class="sidebar-hub__title">Trabalhos ativos</div>
+                  </div>
+                  <span class="sidebar-hub__count">${String(projectSessions.length)}</span>
+                </div>
+                <div class="sidebar-hub__list">
+                  ${projectSessions.length === 0
+                    ? html`<div class="sidebar-hub__empty">Nenhum projeto ativo.</div>`
+                    : projectSessions.map((project) => renderSidebarProjectSession(state, project))}
+                </div>
+              </div>
+
+              <div class="sidebar-hub__section">
+                <div class="sidebar-hub__section-header">
+                  <div>
+                    <div class="sidebar-hub__eyebrow">Agentes</div>
+                    <div class="sidebar-hub__title">Todos os agentes</div>
+                  </div>
+                  <span class="sidebar-hub__count">${String(activeAgents.length)}</span>
+                </div>
+                <div class="sidebar-hub__list">
+                  ${activeAgents.length === 0
+                    ? html`<div class="sidebar-hub__empty">Nenhum agente configurado.</div>`
+                    : activeAgents.map((agent) => renderSidebarAgent(state, agent))}
+                </div>
+              </div>
+            `}
+      </div>
+
+      <div class="sidebar-hub__footer">
+        <button
+          type="button"
+          class="sidebar-settings-button"
+          title="Configurações"
+          aria-label="Configurações"
+          @click=${() => state.setTab("config" as import("./navigation.ts").Tab)}
+        >
+          <span class="sidebar-settings-button__icon" aria-hidden="true">${icons.settings}</span>
+          ${collapsed ? nothing : html`<span>Configurações</span>`}
+        </button>
+      </div>
     </section>
   `;
 }
@@ -662,6 +701,166 @@ function renderSidebarRecentSession(state: AppViewState, row: GatewaySessionRow)
         : nothing}
     </a>
   `;
+}
+
+function renderSidebarProjectSession(state: AppViewState, row: GatewaySessionRow) {
+  const active = row.key === state.sessionKey;
+  const label = resolveSessionDisplayName(row.key, row);
+  const detail =
+    row.goal?.objective?.trim() ||
+    row.subject?.trim() ||
+    row.space?.trim() ||
+    row.room?.trim() ||
+    row.displayName?.trim() ||
+    row.surface?.trim() ||
+    "Projeto";
+  const href = `${pathForTab("chat", state.basePath)}?session=${encodeURIComponent(row.key)}`;
+  return html`
+    <a
+      href=${href}
+      class="sidebar-project ${active ? "sidebar-project--active" : ""}"
+      title=${`${label} · ${detail}`}
+      @click=${(event: MouseEvent) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+        event.preventDefault();
+        if (row.key !== state.sessionKey) {
+          switchChatSession(state, row.key);
+        }
+        state.setTab("chat" as import("./navigation.ts").Tab);
+      }}
+    >
+      <span class="sidebar-project__dot" aria-hidden="true"></span>
+      <span class="sidebar-project__body">
+        <span class="sidebar-project__name">${detail}</span>
+        <span class="sidebar-project__meta">${label}</span>
+      </span>
+    </a>
+  `;
+}
+
+function renderSidebarAgent(
+  state: AppViewState,
+  agent: {
+    id: string;
+    name?: string;
+    identity?: { name?: string; avatarUrl?: string };
+    running: boolean;
+  },
+) {
+  const currentAgentId = resolveSidebarSelectedAgentId(state);
+  const isCurrent = normalizeLowercaseStringOrEmpty(agent.id) === currentAgentId;
+  const label =
+    normalizeOptionalString(agent.identity?.name) ??
+    normalizeOptionalString(agent.name) ??
+    agent.id;
+  const href = pathForTab("agents", state.basePath);
+  return html`
+    <a
+      href=${href}
+      class="sidebar-agent ${isCurrent ? "sidebar-agent--active" : ""}"
+      title=${`${label} · ${agent.id}`}
+      @click=${(event: MouseEvent) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+        event.preventDefault();
+        state.agentsSelectedId = agent.id;
+        state.agentsPanel = "graph";
+        state.setTab("agents" as import("./navigation.ts").Tab);
+      }}
+    >
+      <span class="sidebar-agent__avatar" aria-hidden="true"
+        >${label.slice(0, 1).toUpperCase()}</span
+      >
+      <span class="sidebar-agent__body">
+        <span class="sidebar-agent__name">${label}</span>
+        <span class="sidebar-agent__meta">
+          <span class="sidebar-agent__state ${agent.running ? "is-running" : ""}"></span>
+          ${agent.running ? "Em execução" : isCurrent ? "Agente atual" : "Disponível"}
+        </span>
+      </span>
+    </a>
+  `;
+}
+
+function resolveSidebarProjectSessions(state: AppViewState): GatewaySessionRow[] {
+  return (state.sessionsResult?.sessions ?? [])
+    .filter((row) => {
+      if (row.archived) {
+        return false;
+      }
+      if (row.kind === "cron" || row.kind === "global" || row.kind === "unknown") {
+        return false;
+      }
+      if (row.spawnedBy || isSubagentSessionKey(row.key) || isCronSessionKey(row.key)) {
+        return false;
+      }
+      return Boolean(
+        row.goal?.objective?.trim() || row.subject?.trim() || row.space?.trim() || row.room?.trim(),
+      );
+    })
+    .toSorted((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+    .slice(0, 4);
+}
+
+function resolveSidebarActiveAgents(state: AppViewState): Array<{
+  id: string;
+  name?: string;
+  identity?: { name?: string; avatarUrl?: string };
+  running: boolean;
+}> {
+  const currentAgentId = resolveSidebarSelectedAgentId(state);
+  const seen = new Set<string>();
+  const agents = state.agentsList?.agents ?? [];
+  const runningAgentIds = new Set(
+    (state.sessionsResult?.sessions ?? [])
+      .filter((row) => row.hasActiveRun)
+      .map((row) => resolveAgentIdFromSessionKey(row.key))
+      .filter((agentId): agentId is string => Boolean(agentId))
+      .map((agentId) => normalizeLowercaseStringOrEmpty(agentId)),
+  );
+  const recentAgentIds = [
+    currentAgentId,
+    ...runningAgentIds,
+    ...(state.sessionsResult?.sessions ?? [])
+      .map((row) => resolveAgentIdFromSessionKey(row.key))
+      .filter((agentId): agentId is string => Boolean(agentId && agentId.trim())),
+    ...agents.map((agent) => agent.id),
+  ];
+  const orderedIds = recentAgentIds.filter((agentId) => {
+    const normalized = normalizeLowercaseStringOrEmpty(agentId);
+    if (!normalized || seen.has(normalized)) {
+      return false;
+    }
+    seen.add(normalized);
+    return true;
+  });
+  return orderedIds.map((agentId) => {
+    const normalizedAgentId = normalizeLowercaseStringOrEmpty(agentId);
+    const agent = agents.find(
+      (entry) => normalizeLowercaseStringOrEmpty(entry.id) === normalizedAgentId,
+    );
+    return {
+      ...(agent ?? { id: agentId }),
+      running: runningAgentIds.has(normalizedAgentId),
+    };
+  });
 }
 
 // Lazy-loaded view modules are deferred so the initial bundle stays small.
@@ -2134,6 +2333,13 @@ export function renderApp(state: AppViewState) {
           navRootLabel: "AI & Agents",
           includeSections: [...AI_AGENTS_SECTION_KEYS],
         });
+      case "apiKeys":
+        return renderApiKeys({
+          loading: state.modelAuthStatusLoading,
+          error: state.modelAuthStatusError,
+          result: state.modelAuthStatusResult,
+          onRefresh: () => void loadModelAuthStatusState(state, { refresh: true }),
+        });
       default:
         return nothing;
     }
@@ -2152,6 +2358,15 @@ export function renderApp(state: AppViewState) {
       case "tools":
         void loadToolsCatalog(state, agentId);
         void refreshVisibleToolsEffectiveForCurrentSession(state);
+        return;
+      case "graph":
+        void Promise.allSettled([
+          loadAgentFiles(state, agentId),
+          loadAgentSkills(state, agentId),
+          loadChannels(state, false),
+          state.loadCron(),
+        ]);
+        return;
       case "overview":
       case "channels":
       case "cron":
@@ -3219,6 +3434,12 @@ export function renderApp(state: AppViewState) {
                 runtimeSessionKey: state.sessionKey,
                 runtimeSessionMatchesSelectedAgent: toolsPanelUsesActiveSession,
                 modelCatalog: state.chatModelCatalog ?? [],
+                activeAgentIds: new Set(
+                  (state.sessionsResult?.sessions ?? [])
+                    .filter((row) => row.hasActiveRun)
+                    .map((row) => resolveAgentIdFromSessionKey(row.key))
+                    .filter((agentId): agentId is string => Boolean(agentId)),
+                ),
                 onRefresh: runUiTask(async () => {
                   await loadAgents(state);
                   const agentIds = state.agentsList?.agents?.map((entry) => entry.id) ?? [];
@@ -3239,6 +3460,14 @@ export function renderApp(state: AppViewState) {
                 },
                 onSelectPanel: (panel) => {
                   state.agentsPanel = panel;
+                  if (panel === "graph" && resolvedAgentId) {
+                    void Promise.allSettled([
+                      loadAgentFiles(state, resolvedAgentId),
+                      loadAgentSkills(state, resolvedAgentId),
+                      loadChannels(state, false),
+                      state.loadCron(),
+                    ]);
+                  }
                   if (
                     panel === "files" &&
                     resolvedAgentId &&

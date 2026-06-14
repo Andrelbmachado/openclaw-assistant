@@ -108,7 +108,7 @@ type SettingsHost = {
   agentsList?: AgentsListResult | null;
   selectedAgentId?: string | null;
   agentsSelectedId?: string | null;
-  agentsPanel?: "overview" | "files" | "tools" | "skills" | "channels" | "cron";
+  agentsPanel?: "overview" | "graph" | "files" | "tools" | "skills" | "channels" | "cron";
   pendingGatewayUrl?: string | null;
   systemThemeCleanup?: (() => void) | null;
   pendingGatewayToken?: string | null;
@@ -398,6 +398,15 @@ async function refreshAgentsTab(host: SettingsHost, app: SettingsAppHost) {
       return;
     case "cron":
       void loadCron(host);
+      return;
+    case "graph":
+      void Promise.allSettled([
+        loadAgentFiles(app, agentId),
+        loadAgentSkills(app, agentId),
+        loadChannels(app, false),
+        loadCron(host),
+      ]);
+      return;
     case "overview":
     case "tools":
     case undefined:
@@ -434,6 +443,9 @@ export async function refreshActiveTab(host: SettingsHost, opts?: { chatStartup?
           loadConfigSchemaAfterPrimary(host, app, primaryRefresh);
           await primaryRefresh;
         }
+        break;
+      case "apiKeys":
+        await loadModelAuthStatusState(app, { refresh: true });
         break;
       case "overview":
         await loadOverview(host);

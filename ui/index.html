@@ -9,6 +9,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preload" as="image" href="/openclaw-launch-art.svg" />
     <script>
       (function () {
         var THEMES = { claw: 1, knot: 1, dash: 1 };
@@ -63,6 +64,131 @@
       })();
     </script>
     <style>
+      body.openclaw-launching {
+        margin: 0;
+        min-width: 320px;
+        overflow: hidden;
+        color: #f5f7fa;
+        background:
+          radial-gradient(circle at 20% 20%, rgba(255, 92, 92, 0.18), transparent 32%),
+          radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.08), transparent 22%),
+          linear-gradient(180deg, #07090d 0%, #0d1117 100%);
+      }
+
+      body.openclaw-launching openclaw-app {
+        visibility: hidden;
+      }
+
+      body.openclaw-launch-ready .launch-splash {
+        opacity: 0;
+        transform: scale(0.992);
+        pointer-events: none;
+      }
+
+      .launch-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 20% 20%, rgba(255, 92, 92, 0.12), transparent 28%),
+          linear-gradient(180deg, rgba(6, 8, 12, 0.98), rgba(11, 14, 20, 0.98));
+        transition:
+          opacity 180ms var(--ease-out, ease),
+          transform 180ms var(--ease-out, ease);
+      }
+
+      .launch-splash__panel {
+        position: relative;
+        width: min(100%, 1060px);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 28px;
+        background: rgba(9, 12, 17, 0.74);
+        box-shadow:
+          0 24px 80px rgba(0, 0, 0, 0.44),
+          0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        backdrop-filter: blur(20px);
+      }
+
+      .launch-splash__art {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        aspect-ratio: 16 / 9;
+      }
+
+      .launch-splash__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px 22px;
+      }
+
+      .launch-splash__copy {
+        display: grid;
+        gap: 6px;
+      }
+
+      .launch-splash__eyebrow {
+        margin: 0;
+        color: #8f9aae;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .launch-splash__title {
+        margin: 0;
+        color: #f5f7fa;
+        font-size: clamp(1.05rem, 2vw, 1.25rem);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .launch-splash__subtitle {
+        margin: 0;
+        color: #b7c0cb;
+        font-size: 0.95rem;
+      }
+
+      .launch-splash__meter {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: #cfd6de;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .launch-splash__spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        border-top-color: #ff5c5c;
+        border-radius: 50%;
+        animation: launch-spin 0.9s linear infinite;
+      }
+
+      @keyframes launch-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 720px) {
+        .launch-splash__footer {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 16px 18px 18px;
+        }
+      }
+
       body.openclaw-mount-fallback-active {
         margin: 0;
         min-width: 320px;
@@ -196,7 +322,25 @@
       }
     </style>
   </head>
-  <body>
+  <body class="openclaw-launching">
+    <section class="launch-splash" id="openclaw-launch-splash" aria-label="OpenClaw loading">
+      <div class="launch-splash__panel">
+        <img class="launch-splash__art" src="/openclaw-launch-art.svg" alt="" aria-hidden="true" />
+        <div class="launch-splash__footer">
+          <div class="launch-splash__copy">
+            <p class="launch-splash__eyebrow">OpenClaw Control</p>
+            <h1 class="launch-splash__title">Opening your workspace</h1>
+            <p class="launch-splash__subtitle">
+              Loading chat, projects, agents, skills, artifacts, and connections.
+            </p>
+          </div>
+          <div class="launch-splash__meter" aria-live="polite">
+            <span class="launch-splash__spinner" aria-hidden="true"></span>
+            Starting
+          </div>
+        </div>
+      </div>
+    </section>
     <openclaw-app></openclaw-app>
     <section
       id="openclaw-mount-fallback"
@@ -246,7 +390,8 @@
         var tagName = "openclaw-app";
         var app = document.querySelector(tagName);
         var fallback = document.getElementById("openclaw-mount-fallback");
-        if (!app || !fallback) return;
+        var splash = document.getElementById("openclaw-launch-splash");
+        if (!app || !fallback || !splash) return;
 
         var panel = fallback.querySelector(".mount-fallback__panel");
         var retry = document.getElementById("openclaw-mount-retry");
@@ -254,6 +399,11 @@
         var rawDelay = Number(fallback.getAttribute("data-openclaw-mount-timeout-ms"));
         var delay = Number.isFinite(rawDelay) && rawDelay > 0 ? rawDelay : 12000;
         var timer;
+
+        function hideSplash() {
+          document.body.classList.remove("openclaw-launching");
+          document.body.classList.add("openclaw-launch-ready");
+        }
 
         function appMounted() {
           try {
@@ -275,6 +425,7 @@
 
         function showFallback() {
           if (appMounted()) return;
+          hideSplash();
           fallback.hidden = false;
           document.body.classList.add("openclaw-mount-fallback-active");
           if (panel && typeof panel.focus === "function") {
@@ -297,6 +448,7 @@
           window.customElements.whenDefined(tagName).then(
             function () {
               window.clearTimeout(timer);
+              hideSplash();
               hideFallback();
             },
             function () {},

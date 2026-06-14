@@ -14,6 +14,7 @@ import type {
   ToolsCatalogResult,
   ToolsEffectiveResult,
 } from "../types.ts";
+import { renderAgentGraph } from "./agents-panels-graph.ts";
 import { renderAgentOverview } from "./agents-panels-overview.ts";
 import {
   renderAgentFiles,
@@ -96,6 +97,7 @@ export type AgentsProps = {
   runtimeSessionKey: string;
   runtimeSessionMatchesSelectedAgent: boolean;
   modelCatalog: ModelCatalogEntry[];
+  activeAgentIds?: ReadonlySet<string>;
   onRefresh: () => void;
   onSelectAgent: (agentId: string) => void;
   onSelectPanel: (panel: AgentsPanel) => void;
@@ -224,28 +226,44 @@ export function renderAgents(props: AgentsProps) {
                 tabCounts,
               )}
               ${props.activePanel === "overview"
-                ? keyed(
-                    selectedAgent.id,
-                    renderAgentOverview({
-                      agent: selectedAgent,
-                      basePath: props.basePath,
-                      defaultId,
-                      configForm: props.config.form,
-                      agentFilesList: props.agentFiles.list,
-                      agentIdentity: props.agentIdentityById[selectedAgent.id] ?? null,
-                      agentIdentityError: props.agentIdentityError,
-                      agentIdentityLoading: props.agentIdentityLoading,
-                      configLoading: props.config.loading,
-                      configSaving: props.config.saving,
-                      configDirty: props.config.dirty,
-                      modelCatalog: props.modelCatalog,
-                      onConfigReload: props.onConfigReload,
-                      onConfigSave: props.onConfigSave,
-                      onModelChange: props.onModelChange,
-                      onModelFallbacksChange: props.onModelFallbacksChange,
-                      onSelectPanel: props.onSelectPanel,
-                    }),
-                  )
+                ? html`
+                    ${renderAgentCards(props, agents, defaultId, selectedId)}
+                    ${keyed(
+                      selectedAgent.id,
+                      renderAgentOverview({
+                        agent: selectedAgent,
+                        basePath: props.basePath,
+                        defaultId,
+                        configForm: props.config.form,
+                        agentFilesList: props.agentFiles.list,
+                        agentIdentity: props.agentIdentityById[selectedAgent.id] ?? null,
+                        agentIdentityError: props.agentIdentityError,
+                        agentIdentityLoading: props.agentIdentityLoading,
+                        configLoading: props.config.loading,
+                        configSaving: props.config.saving,
+                        configDirty: props.config.dirty,
+                        modelCatalog: props.modelCatalog,
+                        onConfigReload: props.onConfigReload,
+                        onConfigSave: props.onConfigSave,
+                        onModelChange: props.onModelChange,
+                        onModelFallbacksChange: props.onModelFallbacksChange,
+                        onSelectPanel: props.onSelectPanel,
+                      }),
+                    )}
+                  `
+                : nothing}
+              ${props.activePanel === "graph"
+                ? renderAgentGraph({
+                    agent: selectedAgent,
+                    defaultId,
+                    configForm: props.config.form,
+                    agentFilesList: props.agentFiles.list,
+                    channelCount: channelEntryCount,
+                    cronJobs: props.cron.jobs,
+                    skillCount: selectedSkillCount,
+                    running: props.activeAgentIds?.has(selectedAgent.id) ?? false,
+                    onSelectPanel: props.onSelectPanel,
+                  })
                 : nothing}
               ${props.activePanel === "files"
                 ? renderAgentFiles({
@@ -349,6 +367,66 @@ export function renderAgents(props: AgentsProps) {
   `;
 }
 
+function renderAgentCards(
+  props: AgentsProps,
+  agents: AgentsListResult["agents"],
+  defaultId: string | null,
+  selectedId: string | null,
+) {
+  return html`
+    <section class="agent-card-overview">
+      <header class="agent-card-overview__header">
+        <div>
+          <span>Live overview</span>
+          <h2>Your agents</h2>
+          <p>Select an agent to open its visual workflow.</p>
+        </div>
+        <span class="agent-card-overview__count">${agents.length} configured</span>
+      </header>
+      <div class="agent-card-grid">
+        ${agents.map((agent) => {
+          const context = buildAgentContext(
+            agent,
+            props.config.form,
+            props.agentFiles.list,
+            defaultId,
+            props.agentIdentityById[agent.id] ?? null,
+          );
+          const running = props.activeAgentIds?.has(agent.id) ?? false;
+          return html`
+            <button
+              type="button"
+              class="agent-overview-card ${agent.id === selectedId ? "is-selected" : ""}"
+              @click=${() => {
+                props.onSelectPanel("graph");
+                props.onSelectAgent(agent.id);
+              }}
+            >
+              <span class="agent-overview-card__topline">
+                <span class="agent-overview-card__avatar"
+                  >${context.identityName.slice(0, 1).toUpperCase()}</span
+                >
+                <span class="agent-overview-card__status ${running ? "is-running" : ""}">
+                  <span></span>${running ? "Running" : "Ready"}
+                </span>
+              </span>
+              <span class="agent-overview-card__name">${context.identityName}</span>
+              <span class="agent-overview-card__id">${agent.id}</span>
+              <span class="agent-overview-card__meta">
+                <span>${context.model}</span>
+                <span>${context.skillsLabel}</span>
+              </span>
+              <span class="agent-overview-card__action"
+                >Open workflow <b aria-hidden="true">-&gt;</b></span
+              >
+            </button>
+          `;
+        })}
+      </div>
+    </section>
+  `;
+}
+
 function renderAgentTabs(
   active: AgentsPanel,
   onSelect: (panel: AgentsPanel) => void,
@@ -356,6 +434,7 @@ function renderAgentTabs(
 ) {
   const tabs: Array<{ id: AgentsPanel; label: string }> = [
     { id: "overview", label: t("agents.tabs.overview") },
+    { id: "graph", label: "Workflow" },
     { id: "files", label: t("agents.tabs.files") },
     { id: "tools", label: t("agents.tabs.tools") },
     { id: "skills", label: t("agents.tabs.skills") },

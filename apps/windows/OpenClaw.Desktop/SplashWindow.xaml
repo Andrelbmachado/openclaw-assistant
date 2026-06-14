@@ -1,0 +1,52 @@
+<Window x:Class="OpenClaw.Desktop.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="780"
+        Height="450"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True">
+  <Border CornerRadius="28" Background="#0B0E14" BorderBrush="#252B36" BorderThickness="1">
+    <Border.Effect>
+      <DropShadowEffect Color="#000000" BlurRadius="36" ShadowDepth="12" Opacity="0.55" />
+    </Border.Effect>
+    <Grid ClipToBounds="True">
+      <Grid.Background>
+        <RadialGradientBrush Center="0.30,0.36" GradientOrigin="0.30,0.36" RadiusX="0.72" RadiusY="0.90">
+          <GradientStop Color="#4DFF5C5C" Offset="0" />
+          <GradientStop Color="#1511171F" Offset="0.55" />
+          <GradientStop Color="#FF080B10" Offset="1" />
+        </RadialGradientBrush>
+      </Grid.Background>
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="43*" />
+        <ColumnDefinition Width="57*" />
+      </Grid.ColumnDefinitions>
+
+      <Canvas Grid.Column="0" Width="300" Height="330" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Ellipse Width="260" Height="260" Canvas.Left="20" Canvas.Top="34" Fill="#16FF5C5C" />
+        <Path Fill="#FF4F55" Data="M150,38 C93,38 58,84 58,139 C58,196 91,239 129,258 L129,290 L169,290 L169,258 C174,259 179,259 184,258 L184,290 L224,290 L224,258 C262,239 295,196 295,139 C295,84 260,38 203,38 Z" />
+        <Path Fill="#FF4F55" Data="M66,120 C29,111 8,122 6,145 C4,168 19,186 46,183 C68,181 82,162 84,141 C85,129 80,122 66,120 Z" />
+        <Path Fill="#FF4F55" Data="M287,120 C324,111 345,122 347,145 C349,168 334,186 307,183 C285,181 271,162 269,141 C268,129 273,122 287,120 Z" />
+        <Path Stroke="#FF6A70" StrokeThickness="7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M119,53 Q102,33 86,34" />
+        <Path Stroke="#FF6A70" StrokeThickness="7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M235,53 Q252,33 268,34" />
+        <Ellipse Width="26" Height="26" Canvas.Left="120" Canvas.Top="91" Fill="#080B10" />
+        <Ellipse Width="26" Height="26" Canvas.Left="207" Canvas.Top="91" Fill="#080B10" />
+        <Ellipse Width="8" Height="8" Canvas.Left="127" Canvas.Top="96" Fill="#7FF1E1" />
+        <Ellipse Width="8" Height="8" Canvas.Left="214" Canvas.Top="96" Fill="#7FF1E1" />
+      </Canvas>
+
+      <StackPanel Grid.Column="1" Margin="32,0,46,0" VerticalAlignment="Center">
+        <TextBlock Text="OpenClaw" Foreground="#F6F7F9" FontSize="46" FontWeight="Bold" />
+        <TextBlock Text="Your AI workspace is waking up" Foreground="#B6C0CD" FontSize="17" Margin="2,10,0,0" />
+        <TextBlock Text="Chat · Projects · Agents · Skills · Connections" Foreground="#778394" FontSize="13" Margin="2,9,0,28" />
+        <ProgressBar Height="5" IsIndeterminate="True" Foreground="#FF5C5C" Background="#222936" BorderThickness="0" />
+        <TextBlock Text="Starting local services" Foreground="#8995A5" FontSize="12" Margin="2,12,0,0" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>
